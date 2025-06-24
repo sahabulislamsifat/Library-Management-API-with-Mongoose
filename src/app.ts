@@ -4,12 +4,16 @@ import routes from "./routes";
 
 export const app = express();
 
-app.use([cors(), express.json()]);
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
-app.use(routes);
+// Route Entry Point
+app.use("/api", routes);
 
+// Health Check Route
 app.get("/", (req: Request, res: Response) => {
-  res.send({
+  res.status(200).json({
     success: true,
     message: "Welcome to Library Management API",
   });

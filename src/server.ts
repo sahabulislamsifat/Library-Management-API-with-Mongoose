@@ -1,16 +1,17 @@
-import { config } from "dotenv";
 import mongoose from "mongoose";
 import { app } from "./app";
+import config from "./config/db";
 
 const server = async () => {
   try {
     await mongoose.connect(config.database_url!);
     console.log("Database connected successfully");
+
     app.listen(config.port, () => {
-      console.log(`Server is running on port:${config.port}`);
+      console.log(`Server is running at http://localhost:${config.port}`);
     });
   } catch (error) {
-    console.error("Database connection error:", error);
+    console.error("Failed to connect database", error);
     process.exit(1);
   }
 };
