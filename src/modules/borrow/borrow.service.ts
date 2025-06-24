@@ -1,6 +1,6 @@
-// borrow.service.ts
 import { Borrow } from "./borrow.model";
 import { Book } from "../book/book.model";
+import { Types } from "mongoose";
 
 interface IBorrowPayload {
   book: string;
@@ -11,8 +11,10 @@ interface IBorrowPayload {
 export const borrowBookService = async (payload: IBorrowPayload) => {
   const { book: bookId, quantity, dueDate } = payload;
 
+  const objectBookId = new Types.ObjectId(bookId);
+
   // 1. Check if book exists and enough copies available
-  const book = await Book.findById(bookId);
+  const book = await Book.findById(objectBookId);
   if (!book) {
     throw new Error("Book not found");
   }
@@ -23,15 +25,15 @@ export const borrowBookService = async (payload: IBorrowPayload) => {
   // 2. Deduct copies
   book.copies -= quantity;
 
-  // 3. Update availability using static method
-  await Book.updateAvailability(bookId);
-
-  // 4. Save the updated book copies and availability
+  // 3. Save updated book copies
   await book.save();
+
+  // 4. Update availability with static method
+  await Book.updateAvailability(bookId);
 
   // 5. Create borrow record
   const borrowRecord = await Borrow.create({
-    book: bookId,
+    book: objectBookId,
     quantity,
     dueDate,
   });

@@ -1,4 +1,3 @@
-// borrow.model.ts
 import { Schema, model } from "mongoose";
 import { IBorrow } from "./borrow.interface";
 

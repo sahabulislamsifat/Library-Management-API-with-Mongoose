@@ -1,4 +1,3 @@
-// borrow.controller.ts
 import { Request, Response } from "express";
 import { borrowBookService, getBorrowSummaryService } from "./borrow.service";
 
