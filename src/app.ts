@@ -8,7 +8,7 @@ export const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Route Entry Point
+// API Routes
 app.use("/api", routes);
 
 // Health Check Route

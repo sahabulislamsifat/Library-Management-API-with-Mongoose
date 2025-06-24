@@ -56,3 +56,14 @@ const bookSchema = new Schema<IBook>(
 );
 
 export const Book = model<IBook>("Book", bookSchema);
+
+// book.model.ts (Add this static method inside bookSchema)
+
+bookSchema.statics.updateAvailability = async function (bookId: string) {
+  const book = await this.findById(bookId);
+
+  if (!book) throw new Error("Book not found");
+
+  book.available = book.copies > 0;
+  await book.save();
+};
