@@ -1,12 +1,14 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import routes from "./routes";
+import { requestLogger } from "./middlewares/requestLogger";
 
 export const app = express();
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 // API Routes
 app.use("/api", routes);

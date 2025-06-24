@@ -1,7 +1,7 @@
+// routes/index.ts
 import { Router } from "express";
 import bookRoute from "../modules/book/book.route";
 import borrowRoute from "../modules/borrow/borrow.route";
-// import borrowRoute from "../modules/borrow/borrow.route"; // future
 
 const routes = Router();
 

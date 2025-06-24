@@ -1,29 +1,75 @@
+// borrow.service.ts
 import { Borrow } from "./borrow.model";
-import { IBorrow } from "./borrow.interface";
+import { Book } from "../book/book.model";
 
-export const createBorrowService = async (payload: IBorrow) => {
-  return await Borrow.create(payload);
+interface IBorrowPayload {
+  book: string;
+  quantity: number;
+  dueDate: Date;
+}
+
+export const borrowBookService = async (payload: IBorrowPayload) => {
+  const { book: bookId, quantity, dueDate } = payload;
+
+  // 1. Check if book exists and enough copies available
+  const book = await Book.findById(bookId);
+  if (!book) {
+    throw new Error("Book not found");
+  }
+  if (book.copies < quantity) {
+    throw new Error("Not enough copies available to borrow");
+  }
+
+  // 2. Deduct copies
+  book.copies -= quantity;
+
+  // 3. Update availability using static method
+  await Book.updateAvailability(bookId);
+
+  // 4. Save the updated book copies and availability
+  await book.save();
+
+  // 5. Create borrow record
+  const borrowRecord = await Borrow.create({
+    book: bookId,
+    quantity,
+    dueDate,
+  });
+
+  return borrowRecord;
 };
 
-export const getAllBorrowedBooksService = async () => {
-  return await Borrow.find().populate("bookId");
-};
+// Borrow aggregation summary
+export const getBorrowSummaryService = async () => {
+  const summary = await Borrow.aggregate([
+    {
+      $group: {
+        _id: "$book",
+        totalQuantity: { $sum: "$quantity" },
+      },
+    },
+    {
+      $lookup: {
+        from: "books",
+        localField: "_id",
+        foreignField: "_id",
+        as: "book",
+      },
+    },
+    {
+      $unwind: "$book",
+    },
+    {
+      $project: {
+        _id: 0,
+        totalQuantity: 1,
+        book: {
+          title: "$book.title",
+          isbn: "$book.isbn",
+        },
+      },
+    },
+  ]);
 
-export const getBorrowByIdService = async (id: string) => {
-  return await Borrow.findById(id).populate("bookId");
-};
-
-export const updateBorrowReturnStatusService = async (
-  id: string,
-  returnDate: Date
-) => {
-  return await Borrow.findByIdAndUpdate(
-    id,
-    { isReturned: true, returnDate },
-    { new: true }
-  );
-};
-
-export const deleteBorrowService = async (id: string) => {
-  return await Borrow.findByIdAndDelete(id);
+  return summary;
 };
