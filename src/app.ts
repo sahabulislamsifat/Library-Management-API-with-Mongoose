@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(requestLogger);
 
 // API Routes
-app.use("/", routes);
+app.use("/api", routes);
 
 // Health Check Route
 app.get("/", (req: Request, res: Response) => {
